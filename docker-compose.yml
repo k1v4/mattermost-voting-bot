@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  tarantool_db:
+    image: tarantool/tarantool:2.10
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./data:/var/lib/tarantoolDB
+      - ./init.lua:/opt/tarantoolDB/init.lua
+    command: ["tarantoolDB", "/opt/tarantoolDB/init.lua"]

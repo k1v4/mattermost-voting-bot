@@ -1,4 +1,8 @@
-box.schema.user.create('vote_bot', {password = 'password'})
+box.cfg{
+    listen = 3301
+}
+
+box.schema.user.create('vote_bot', {password = 'password'}, {if_not_exists = true})
 box.schema.user.grant('vote_bot', 'read,write,execute', 'universe')
 
 -- Создание пространств
@@ -11,11 +15,17 @@ polls = box.schema.space.create('polls', {
         {name = 'options', type = 'map'},
         {name = 'status', type = 'string'}, -- 'active'/'closed'
         {name = 'created_at', type = 'unsigned'}
-    },
-    indexes = {
-        {name = 'primary', type = 'hash', parts = {'id'}},
-        {name = 'creator_idx', type = 'tree', parts = {'creator'}}
     }
+})
+
+polls:create_index('primary', {
+    type = 'hash',
+    parts = {'id'}
+})
+
+polls:create_index('creator_idx', {
+    type = 'tree',
+    parts = {'creator'}
 })
 
 votes = box.schema.space.create('votes', {
@@ -25,9 +35,15 @@ votes = box.schema.space.create('votes', {
         {name = 'user_id', type = 'string'},
         {name = 'option', type = 'string'},
         {name = 'voted_at', type = 'unsigned'}
-    },
-    indexes = {
-        {name = 'primary', type = 'tree', parts = {'poll_id', 'user_id'}},
-        {name = 'poll_idx', type = 'tree', parts = {'poll_id'}}
     }
+})
+
+votes:create_index('primary', {
+    type = 'tree',
+    parts = {'poll_id', 'user_id'}
+})
+
+votes:create_index('poll_idx', {
+    type = 'tree',
+    parts = {'poll_id'}
 })
