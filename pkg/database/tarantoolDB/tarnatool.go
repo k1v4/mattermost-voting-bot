@@ -12,11 +12,11 @@ import (
 )
 
 type DBConfig struct {
-	Host     string        `json:"host"`
-	Port     int           `json:"port"`
-	User     string        `json:"user"`
-	Password string        `json:"password"`
-	Timeout  time.Duration `json:"timeout"`
+	Host     string        `json:"host" env:"HOST"`
+	Port     int           `json:"port" env:"PORT"`
+	User     string        `json:"user" env:"USER"`
+	Password string        `json:"password" env:"PASSWORD"`
+	Timeout  time.Duration `json:"timeout" env:"TIMEOUT"`
 }
 
 type DB struct {

@@ -7,5 +7,5 @@ services:
       - "3301:3301"
     volumes:
       - ./data:/var/lib/tarantoolDB
-      - ./init.lua:/opt/tarantoolDB/init.lua
-    command: ["tarantoolDB", "/opt/tarantoolDB/init.lua"]
+      - ./init.lua:/opt/init.lua
+    command: ["tarantool", "/opt/init.lua"]

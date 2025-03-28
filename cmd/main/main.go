@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"github.com/k1v4/mattermost-voting-bot/internal/config"
+	"github.com/k1v4/mattermost-voting-bot/pkg/client"
 	"github.com/k1v4/mattermost-voting-bot/pkg/database/tarantoolDB"
 	"github.com/k1v4/mattermost-voting-bot/pkg/logger"
-	"github.com/tarantool/go-tarantool/v2"
 	_ "github.com/tarantool/go-tarantool/v2/datetime"
 	_ "github.com/tarantool/go-tarantool/v2/decimal"
 	_ "github.com/tarantool/go-tarantool/v2/uuid"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 //func main() {
@@ -34,7 +37,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-
 	votingBotLogger := logger.NewLogger()
 	ctx = context.WithValue(ctx, logger.LoggerKey, votingBotLogger)
 
@@ -42,12 +44,26 @@ func main() {
 	if cfg == nil {
 		panic("load config fail")
 	}
-
-	votingBotLogger.Info(ctx, "read config successfully")
+	votingBotLogger.Info(ctx, "Config loaded successfully")
 
 	storage, err := tarantoolDB.New(cfg.DBConfig)
 	if err != nil {
 		panic(err)
 	}
+	votingBotLogger.Info(ctx, "Connected to Tarantool")
 
+	_, err = client.NewVotingBot(client.VotingBotConfig{
+		MattermostURL: cfg.MattermostURL,
+		BotToken:      cfg.BotToken,
+	}, storage)
+	if err != nil {
+		panic(err)
+	}
+	votingBotLogger.Info(ctx, "Voting bot started")
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+
+	votingBotLogger.Info(ctx, "Shutting down bot...")
 }
